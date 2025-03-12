@@ -1,90 +1,94 @@
+using System.Configuration;
 using System.Data;
 using Microsoft.Data.SqlClient; //Install-Package Microsoft.Data.SqlClient
+using Microsoft.VisualBasic;
 
 namespace HistorianBackUp_App
 {
-        public partial class Form1 : Form
+    public partial class Form1 : Form
+    {
+        SqlConnection connection = null;
+        SqlDataReader reader = null;
+        string path = string.Empty;
+
+        public Form1()
         {
-            SqlConnection connection = null;
-            SqlDataReader reader = null;
+            InitializeComponent();
+        }
 
-            public Form1()
+        // Evento del botÔøΩn para conectar
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            // Recoger los datos ingresados por el usuario en los TextBox
+            string server = txtServer.Text.Trim();
+            string database = txtDatabase.Text.Trim();
+            string user = txtUser.Text.Trim(); // Agregar TextBox para usuario
+            string password = txtPassword.Text.Trim(); // Agregar TextBox para contraseÔøΩa
+
+            // Crear la cadena de conexiÔøΩn
+            if (string.IsNullOrEmpty(server) || string.IsNullOrEmpty(database))
             {
-                InitializeComponent();
+                MessageBox.Show("Servidor y Base de Datos son obligatorios.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            // Evento del botÛn para conectar
-            private void btnConnect_Click(object sender, EventArgs e)
+
+            // Determinar el tipo de autenticaciÔøΩn
+            string connectionString;
+            if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password))
             {
-                // Recoger los datos ingresados por el usuario en los TextBox
-                string server = txtServer.Text.Trim();
-                string database = txtDatabase.Text.Trim();
-                string user = txtUser.Text.Trim(); // Agregar TextBox para usuario
-                string password = txtPassword.Text.Trim(); // Agregar TextBox para contraseÒa
+                connectionString = $"Server={server}; Database={database}; User Id={user}; Password={password}; TrustServerCertificate=True;";
+            }
+            else
+            {
+                connectionString = $"Server={server}; Database={database}; TrustServerCertificate=True;";
+            }
 
-                // Crear la cadena de conexiÛn
-                if (string.IsNullOrEmpty(server) || string.IsNullOrEmpty(database))
-                {
-                    MessageBox.Show("Servidor y Base de Datos son obligatorios.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+            // Intentar conectar con la base de datos
+            connection = new SqlConnection(connectionString); // Mueve la creaciÔøΩn de la conexiÔøΩn fuera de using
 
-                // Determinar el tipo de autenticaciÛn
-                string connectionString;
-                if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password))
-                {
-                    connectionString = $"Server={server}; Database={database}; User Id={user}; Password={password}; TrustServerCertificate=True;";
-                }
-                else
-                {
-                    connectionString = $"Server={server}; Database={database}; TrustServerCertificate=True;";
-                }
+            try
+            {
+                connection.Open();  // Establecer la conexiÔøΩn
+                lblStatus.Text = "ConexiÔøΩn exitosa!";
+                lblStatus.ForeColor = System.Drawing.Color.Green;  // Cambiar color de texto a verde
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al obtener las bases de datos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.ForeColor = System.Drawing.Color.Red;  // Cambiar color de texto a rojo
+            }
+        }
 
-                // Intentar conectar con la base de datos
-                connection = new SqlConnection(connectionString); // Mueve la creaciÛn de la conexiÛn fuera de using
+        // Evento para ejecutar la consulta
+        private void btnExecuteQuery_Click(object sender, EventArgs e)
+        {
+            string query = txtQuery.Text.Trim(); // Obtener el texto de la consulta del TextBox
 
+            // Comprobar si la consulta estÔøΩ vacÔøΩa
+            if (string.IsNullOrEmpty(query))
+            {
+                MessageBox.Show("Por favor, ingresa una consulta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            SqlCommand command = new SqlCommand(query, connection);
+            command.CommandTimeout = 1000;
+
+            // Ejecutar la consulta y mostrar los resultados
+            using (command)
+            {
                 try
                 {
-                    connection.Open();  // Establecer la conexiÛn
-                    lblStatus.Text = "ConexiÛn exitosa!";
-                    lblStatus.ForeColor = System.Drawing.Color.Green;  // Cambiar color de texto a verde
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error al obtener las bases de datos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    lblStatus.ForeColor = System.Drawing.Color.Red;  // Cambiar color de texto a rojo
-                }
-            }
+                    // Crear un SqlDataReader para leer los resultados de la consulta
+                    reader = command.ExecuteReader();
 
-            // Evento para ejecutar la consulta
-            private void btnExecuteQuery_Click(object sender, EventArgs e)
-            {
-                string query = txtQuery.Text.Trim(); // Obtener el texto de la consulta del TextBox
-                
-                // Comprobar si la consulta est· vacÌa
-                if (string.IsNullOrEmpty(query))
-                {
-                    MessageBox.Show("Por favor, ingresa una consulta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                SqlCommand command = new SqlCommand(query, connection);
-                command.CommandTimeout = 1000;
-
-                // Ejecutar la consulta y mostrar los resultados
-                using (command)
-                {
-                    try
-                    {
-                        // Crear un SqlDataReader para leer los resultados de la consulta
-                        reader = command.ExecuteReader();
-
-                        // Limpiar el ListBox antes de mostrar nuevos resultados
-                        lstResults.Items.Clear();
+                    // Limpiar el ListBox antes de mostrar nuevos resultados
+                    lstResults.Items.Clear();
 
                     while (reader.Read())
                     {
-                        // Leer din·micamente todas las columnas
-                        string result = string.Join("|",
+                        // Leer dinÔøΩmicamente todas las columnas
+                        string result = string.Join(" | ",
                             Enumerable.Range(0, reader.FieldCount)
                                       .Select(i => reader.IsDBNull(i) ? "NULL" : reader.GetValue(i).ToString()));
 
@@ -92,34 +96,54 @@ namespace HistorianBackUp_App
                     }
 
                     reader.Close();  // Cerrar el SqlDataReader
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error al ejecutar la consulta: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
                 }
-            }
-
-            private void btnLoadQuery_Click(object sender, EventArgs e)
-            {
-                txtQuery.Text = "SELECT table_name\r\nFROM information_schema.tables\r\nWHERE table_type = 'BASE TABLE'";
-            }
-
-            private void btnCloseConnection_Click(object sender, EventArgs e)
-            {
-                if (connection != null && connection.State == ConnectionState.Open)
+                catch (Exception ex)
                 {
-                    connection.Close();
-                }
-                else
-                {
-                    MessageBox.Show("No hay una conexiÛn activa.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Error al ejecutar la consulta: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
 
-            private void btnTemplates_Click(object sender, EventArgs e)
+        private void btnLoadQuery_Click(object sender, EventArgs e)
+        {
+            txtQuery.Text = "SELECT table_name\r\nFROM information_schema.tables\r\nWHERE table_type = 'BASE TABLE'";
+        }
+
+        private void btnCloseConnection_Click(object sender, EventArgs e)
+        {
+            if (connection != null && connection.State == ConnectionState.Open)
             {
-                string query = $@"SELECT 
+                connection.Close();
+                lblStatus.Text = "Conexion cerrada.";
+                lblStatus.ForeColor = System.Drawing.Color.Red;  // Cambiar color de texto a rojo
+            }
+            else
+            {
+                MessageBox.Show("No hay una conexiÔøΩn activa.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    path = dialog.SelectedPath;
+                    lblPath.Text = dialog.SelectedPath;
+                }
+            }
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                MessageBox.Show("Por favor, selecciona una carpeta para guardar el archivo CSV.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string query = $@"SELECT 
                     [TagName], 
                     1 AS FixedValue,
                     FORMAT([DateTime], 'yyyy/MM/dd|HH:mm:ss.fff') AS FormattedDateTime, -- Limitar a 3 decimales de milisegundos
@@ -130,12 +154,93 @@ namespace HistorianBackUp_App
                     [Runtime].[dbo].[v_History]
                 WHERE 
                     TagName LIKE '{textBox2.Text}' 
-                    AND wwRetrievalMode = 'full' 
+                    AND wwRetrievalMode = '{textBox2.Text}' 
                     AND [DateTime] BETWEEN '{textBox1.Text}' AND '{textBox3.Text}'
                 ORDER BY 
-                    [DateTime] ASC;";
+                    [DateTime] ASC;".Trim();
+            
+            txtQuery.Text = query;
 
-                txtQuery.Text = query;
+            if (string.IsNullOrEmpty(query))// Comprobar si la consulta est√° vac√≠a
+            {
+                MessageBox.Show("Por favor, ingresa una consulta.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            SqlCommand command = new SqlCommand(query, connection);
+            command.CommandTimeout = 1000;
+
+            // Ejecutar la consulta y mostrar los resultados
+            using (command)
+            {
+                try
+                {
+                    // Limite de 4MB en bytes
+                    const int maxFileSize = (4 * 1024 * 1024) - 194304; // 4MB
+
+                    // Contador de archivos generados
+                    int fileCounter = 1;
+
+                    // Ruta del archivo inicial
+                    string baseFileName = Path.Combine(path, "datos");
+                    string fileName = $"{baseFileName}_{fileCounter}.csv";
+
+                    // Crear el primer archivo CSV
+                    StreamWriter writer = new StreamWriter(fileName, false, System.Text.Encoding.GetEncoding(1252));
+
+                    // Escribir los encabezados solo una vez
+                    writer.WriteLine("ASCI");
+                    writer.WriteLine("|");
+                    writer.WriteLine("PRUEBA|PRUEBA");
+
+                    // Crear un SqlDataReader para leer los resultados de la consulta
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        // Leer din√°micamente todas las columnas
+                        string result = string.Join("|",
+                            Enumerable.Range(0, reader.FieldCount)
+                                      .Select(i => reader.IsDBNull(i) ? "NULL" : reader.GetValue(i).ToString()));
+
+                        // Verificar si el tama√±o del archivo excede el l√≠mite
+                        if (new FileInfo(fileName).Length + result.Length > maxFileSize)
+                        {
+                            // Cerrar el archivo actual
+                            writer.Close();
+
+                            // Incrementar el contador de archivos
+                            fileCounter++;
+
+                            // Generar un nuevo nombre de archivo
+                            fileName = $"{baseFileName}_{fileCounter}.csv";
+
+                            // Crear un nuevo archivo CSV
+                            writer = new StreamWriter(fileName, false, System.Text.Encoding.GetEncoding(1252));
+
+                            // Escribir los encabezados nuevamente en el nuevo archivo
+                            writer.WriteLine("ASCI");
+                            writer.WriteLine("|");
+                            writer.WriteLine("PRUEBA|PRUEBA");
+                        }
+
+                        // Escribir la l√≠nea en el archivo CSV
+                        writer.WriteLine(result);
+                    }
+
+                    // Cerrar el SqlDataReader
+                    reader.Close();
+
+                    // Cerrar el StreamWriter
+                    writer.Close();
+
+                    MessageBox.Show("Datos exportados correctamente.", "√âxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error al exportar los datos: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
+    }
 }
