@@ -40,7 +40,7 @@ namespace HistorianBackUp_App
             }
             else
             {
-                connectionString = $"Server={server}; Database={database}; TrustServerCertificate=True;";
+                connectionString = $"Server={server}; Database={database}; Trusted_Connection=True; TrustServerCertificate=True;";
             }
 
             // Intentar conectar con la base de datos
@@ -130,7 +130,7 @@ namespace HistorianBackUp_App
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     path = dialog.SelectedPath;
-                    lblPath.Text = dialog.SelectedPath;
+                    label5.Text = dialog.SelectedPath;
                 }
             }
         }
@@ -154,11 +154,11 @@ namespace HistorianBackUp_App
                     [Runtime].[dbo].[v_History]
                 WHERE 
                     TagName LIKE '{textBox2.Text}' 
-                    AND wwRetrievalMode = '{textBox2.Text}' 
+                    AND wwRetrievalMode = '{comboBox1.Text.ToLower()}'
                     AND [DateTime] BETWEEN '{textBox1.Text}' AND '{textBox3.Text}'
                 ORDER BY 
                     [DateTime] ASC;".Trim();
-            
+
             txtQuery.Text = query;
 
             if (string.IsNullOrEmpty(query))// Comprobar si la consulta está vacía
@@ -189,9 +189,9 @@ namespace HistorianBackUp_App
                     StreamWriter writer = new StreamWriter(fileName, false, System.Text.Encoding.GetEncoding(1252));
 
                     // Escribir los encabezados solo una vez
-                    writer.WriteLine("ASCI");
+                    writer.WriteLine("ASCII");
                     writer.WriteLine("|");
-                    writer.WriteLine("PRUEBA|PRUEBA");
+                    writer.WriteLine("Administrator|LOCAL|Server Local|10|0");
 
                     // Crear un SqlDataReader para leer los resultados de la consulta
                     SqlDataReader reader = command.ExecuteReader();
@@ -219,9 +219,9 @@ namespace HistorianBackUp_App
                             writer = new StreamWriter(fileName, false, System.Text.Encoding.GetEncoding(1252));
 
                             // Escribir los encabezados nuevamente en el nuevo archivo
-                            writer.WriteLine("ASCI");
+                            writer.WriteLine("ASCII");
                             writer.WriteLine("|");
-                            writer.WriteLine("PRUEBA|PRUEBA");
+                            writer.WriteLine("Administrator|LOCAL|Server Local|10|0");
                         }
 
                         // Escribir la línea en el archivo CSV

@@ -38,6 +38,7 @@ namespace HistorianBackUp_App
             lblDatabase = new Label();
             lblServer = new Label();
             groupBox1 = new GroupBox();
+            label5 = new Label();
             btnExport = new Button();
             label3 = new Label();
             label2 = new Label();
@@ -239,6 +240,7 @@ namespace HistorianBackUp_App
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(label5);
             groupBox1.Controls.Add(btnExport);
             groupBox1.Controls.Add(label3);
             groupBox1.Controls.Add(label2);
@@ -256,9 +258,18 @@ namespace HistorianBackUp_App
             groupBox1.TabStop = false;
             groupBox1.Text = "Historian BackUp";
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(121, 27);
+            label5.Name = "label5";
+            label5.Size = new Size(39, 15);
+            label5.TabIndex = 11;
+            label5.Text = "---";
+            // 
             // btnExport
             // 
-            btnExport.Location = new Point(15, 135);
+            btnExport.Location = new Point(15, 146);
             btnExport.Name = "btnExport";
             btnExport.Size = new Size(75, 23);
             btnExport.TabIndex = 9;
@@ -269,7 +280,7 @@ namespace HistorianBackUp_App
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(96, 22);
+            label3.Location = new Point(91, 27);
             label3.Name = "label3";
             label3.Size = new Size(34, 15);
             label3.TabIndex = 10;
@@ -278,24 +289,24 @@ namespace HistorianBackUp_App
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(15, 90);
+            label2.Location = new Point(15, 101);
             label2.Name = "label2";
-            label2.Size = new Size(55, 15);
+            label2.Size = new Size(56, 15);
             label2.TabIndex = 4;
             label2.Text = "Tagname";
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(15, 44);
+            label1.Location = new Point(15, 55);
             label1.Name = "label1";
-            label1.Size = new Size(70, 15);
+            label1.Size = new Size(71, 15);
             label1.TabIndex = 3;
             label1.Text = "Time Stamp";
             // 
             // textBox3
             // 
-            textBox3.Location = new Point(140, 62);
+            textBox3.Location = new Point(140, 73);
             textBox3.Name = "textBox3";
             textBox3.Size = new Size(121, 23);
             textBox3.TabIndex = 2;
@@ -303,7 +314,7 @@ namespace HistorianBackUp_App
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(15, 106);
+            textBox2.Location = new Point(15, 117);
             textBox2.Name = "textBox2";
             textBox2.Size = new Size(119, 23);
             textBox2.TabIndex = 1;
@@ -312,15 +323,16 @@ namespace HistorianBackUp_App
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "full" });
-            comboBox1.Location = new Point(140, 106);
+            comboBox1.Items.AddRange(new object[] { "Full", "Delta", "Cyclic", "Interpolated", "Bestfit", "Average", "Min", "Max", "Integral", "Slope", "Counter", "Valuestate", "Roundtrip" });
+            comboBox1.Location = new Point(140, 117);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(121, 23);
             comboBox1.TabIndex = 7;
+            comboBox1.Text = "Delta";
             // 
             // button1
             // 
-            button1.Location = new Point(15, 18);
+            button1.Location = new Point(15, 23);
             button1.Name = "button1";
             button1.Size = new Size(75, 23);
             button1.TabIndex = 5;
@@ -330,7 +342,7 @@ namespace HistorianBackUp_App
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(15, 62);
+            textBox1.Location = new Point(15, 73);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(119, 23);
             textBox1.TabIndex = 0;
@@ -339,7 +351,7 @@ namespace HistorianBackUp_App
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(140, 88);
+            label4.Location = new Point(140, 99);
             label4.Name = "label4";
             label4.Size = new Size(80, 15);
             label4.TabIndex = 8;
@@ -412,5 +424,6 @@ namespace HistorianBackUp_App
         private Label lblStatus;
         private TabControl tabControl;
         private GroupBox groupBox2;
+        private Label label5;
     }
 }
